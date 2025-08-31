@@ -1,0 +1,43 @@
+// Source: https://gis.stackexchange.com/a/413070
+
+/**
+ * Copyright (c) 2017 Dongdong Kong. All rights reserved.
+ * This work is licensed under the terms of the MIT license.  
+ * For a copy, see <https://opensource.org/licenses/MIT>.
+ *
+ * Batch execute GEE Export task
+ *
+ * First of all, You need to generate export tasks. And run button was shown.
+ *   
+ * Then press F12 get into console, then paste those scripts in it, and press 
+ * enter. All the task will be start automatically. 
+ * (Firefox and Chrome are supported. Other Browsers I didn't test.)
+ * 
+ * @Author: 
+ *  Dongdong Kong, 28 Aug' 2017, Sun Yat-sen University
+ *  yzq.yang, 17 Sep' 2021
+ */
+
+function runTaskList(){
+    // var tasklist = document.getElementsByClassName('task local type-EXPORT_IMAGE awaiting-user-config');
+    // for (var i = 0; i < tasklist.length; i++)
+    //         tasklist[i].getElementsByClassName('run-button')[0].click();
+    $$('.run-button' ,$$('ee-task-pane')[0].shadowRoot).forEach(function(e) {
+         e.click();
+    })
+    }
+    
+runTaskList(); 
+    
+function confirmAll() {
+    // var ok = document.getElementsByClassName('goog-buttonset-default goog-buttonset-action');
+    // for (var i = 0; i < ok.length; i++)
+    //     ok[i].click();
+    $$('ee-table-config-dialog, ee-image-config-dialog').forEach(function(e) {
+            var eeDialog = $$('ee-dialog', e.shadowRoot)[0]
+            var paperDialog = $$('paper-dialog', eeDialog.shadowRoot)[0]
+            $$('.ok-button', paperDialog)[0].click()
+    })
+}
+
+confirmAll();
