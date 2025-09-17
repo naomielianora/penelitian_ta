@@ -1,0 +1,7 @@
+streamlit
+rasterio
+numpy
+matplotlib
+scikit-learn
+scipy
+scikit-image

@@ -1025,3 +1025,225 @@ volcanoes.forEach(function(target) {
     crs: 'EPSG:4326'
   });
 });
+
+
+
+// ===================================================================
+// PARAMS
+// ===================================================================
+// pakai data selama 2 tahun
+var START = '2022-06-01';
+var END   = '2025-06-01';
+
+// ===================================================================
+// UTILITIES
+// ===================================================================
+function toaToBT(image) {
+  // var ML = ee.Image.constant(image.get('RADIANCE_MULT_BAND_10'));
+  // var AL = ee.Image.constant(image.get('RADIANCE_ADD_BAND_10'));
+  // var K1 = ee.Image.constant(image.get('K1_CONSTANT_BAND_10'));
+  // var K2 = ee.Image.constant(image.get('K2_CONSTANT_BAND_10'));
+  
+  var ML = 0.00038;
+  var AL = 0.1;
+  var K1 = 799.0284;
+  var K2 = 1329.2405;
+
+  var radiance = image.select('B10').multiply(ML).add(AL);
+
+  var BT_K = radiance.expression(
+    'K2 / log((K1 / L) + 1)', {
+      'K1': K1,
+      'K2': K2,
+      'L': radiance
+    }
+  );
+
+  var BT_C = BT_K.subtract(273.15).rename('BT_C').toFloat();
+
+  return image.addBands(BT_C);
+}
+
+function maskL8sr(image) {
+  var qa = image.select('QA_PIXEL');
+  var cloud = qa.bitwiseAnd(1 << 3).neq(0);
+  var shadow = qa.bitwiseAnd(1 << 4).neq(0);
+  var mask = cloud.or(shadow).not();
+  return image.updateMask(mask);
+}
+
+// ===================================================================
+// LOOPING SEMUA GUNUNG
+// ===================================================================
+volcanoes.forEach(function(target) {
+  var name = target.name;
+
+  var geometryCollection = target.area;
+  var geometries = geometryCollection.geometries();
+  var volcanoArea = ee.Geometry(geometries.get(1));
+
+  // Koleksi Landsat
+  var ic = ee.ImageCollection('LANDSAT/LC09/C02/T1')
+              .filterBounds(volcanoArea)
+              .filterDate(START, END)
+              .map(maskL8sr)   
+              .map(toaToBT);
+
+  // Agregasi thermal
+  var bt = ic.select('BT_C')
+            .reduce(ee.Reducer.percentile([30]))
+            .rename('BT_C_p30')
+            .toFloat();
+
+  // Ambil percentile RGB
+  var rgb = ic.select(['B4','B3','B2'])
+              .reduce(ee.Reducer.percentile([30]))
+              .toFloat();
+
+  // Gabung
+  var exportImg = bt.addBands(rgb).clip(volcanoArea);
+
+  // Export task
+  Export.image.toDrive({
+    image: exportImg,
+    description: 'Thermal_RGB_' + name,
+    folder: 'BT_Max_Images',
+    scale: 30,
+    region: volcanoArea,
+    maxPixels: 1e13,
+    fileFormat: 'GeoTIFF',
+    crs: 'EPSG:4326'
+  });
+});
+
+
+
+
+// // VIZ ONE VOLCANO ===================================================================
+// // PARAMS
+// // ===================================================================
+// // YYYY-MM-DD
+// var START = '2023-06-01';
+// var END   = '2025-06-01';
+
+// var targetName = "Kelimutu";   // ganti sesuai nama
+// var target = volcanoes.filter(function(v) {
+//   return v.name === targetName;
+// })[0];
+
+// // print('Gunung target:', target);
+
+// // ===================================================================
+// // UTILITIES
+// // ===================================================================
+// function toaToBT(image) {
+//   var ML = ee.Image.constant(image.get('RADIANCE_MULT_BAND_10'));
+//   var AL = ee.Image.constant(image.get('RADIANCE_ADD_BAND_10'));
+//   var K1 = ee.Image.constant(image.get('K1_CONSTANT_BAND_10'));
+//   var K2 = ee.Image.constant(image.get('K2_CONSTANT_BAND_10'));
+
+//   var radiance = image.select('B10').multiply(ML).add(AL);
+
+//   var BT_K = radiance.expression(
+//     'K2 / log((K1 / L) + 1)', {
+//       'K1': K1,
+//       'K2': K2,
+//       'L': radiance
+//     }
+//   );
+
+//   var BT_C = BT_K.subtract(273.15).rename('BT_C').toFloat();
+
+//   return image.addBands(BT_C);
+// }
+
+// function maskL8sr(image) {
+//   var qa = image.select('QA_PIXEL');
+//   var cloud = qa.bitwiseAnd(1 << 3).neq(0);
+//   var shadow = qa.bitwiseAnd(1 << 4).neq(0);
+//   var mask = cloud.or(shadow).not();
+//   return image.updateMask(mask);
+// }
+
+// // ===================================================================
+// // AMBIL DATA
+// // ===================================================================
+// var geometryCollection = target.area;
+// var geometries = geometryCollection.geometries();
+// var volcanoArea = ee.Geometry(geometries.get(1));
+
+// var ic = ee.ImageCollection('LANDSAT/LC09/C02/T1')
+//           .filterBounds(volcanoArea)
+//           .filterDate(START, END)
+//           .map(maskL8sr)   
+//           .map(toaToBT);
+
+// // Agregasi thermal pakai median (persentil 50)
+// var bt = ic.select('BT_C')
+//           .reduce(ee.Reducer.percentile([70]))
+//           .rename('BT_C')
+//           .toFloat();
+
+// // Ambil median RGB untuk true color
+// var rgb = ic.select(['B4','B3','B2'])
+//             .reduce(ee.Reducer.percentile([70]))
+//             .toFloat();
+
+// // Gabung jadi 1 image multi-band
+// var exportImg = bt.addBands(rgb).clip(volcanoArea);
+
+
+// // Gabung jadi 1 image multi-band
+// var exportImg = bt.addBands(rgb).clip(volcanoArea);
+
+// // ===================================================================
+// // STATISTIK
+// // ===================================================================
+// var stats = bt.reduceRegion({
+//   reducer: ee.Reducer.minMax().combine({reducer2: ee.Reducer.mean(), sharedInputs:true}),
+//   geometry: volcanoArea,
+//   scale: 30,
+//   maxPixels: 1e13,
+//   bestEffort: true
+// });
+
+// print('Statistik BT (persentil 50) untuk ' + targetName, stats);
+
+
+
+// // VISUALIZATION
+// // ===============================================================
+// // Hitung min & max dari band BT_C_max
+// // ===============================================================
+// var stats = bt.reduceRegion({
+//   reducer: ee.Reducer.minMax(),
+//   geometry: volcanoArea,   // area studi
+//   scale: 30,               // resolusi Landsat
+//   bestEffort: true
+// });
+
+// // Ambil nilai min & max
+// var minBT = ee.Number(stats.get('BT_C_min'));
+// var maxBT = ee.Number(stats.get('BT_C_max'));
+
+// // Tampilkan di console biar cek
+// print('BT Min (°C):', minBT);
+// print('BT Max (°C):', maxBT);
+
+// // ===============================================================
+// // VISUALISASI
+// // ===============================================================
+// var visParams = {
+//   min: minBT.getInfo(),
+//   max: maxBT.getInfo(),
+//   palette: [
+//     "040274", "2c7bb6", "abd9e9", "ffffbf", "fdae61", "d7191c"
+//   ]
+// };
+
+// // clip hasil BT ke volcanoArea
+// var bt_clipped = bt.clip(volcanoArea);
+
+// // tampilkan hasil clip
+// // Map.centerObject(volcanoArea, 10);
+// Map.addLayer(bt_clipped, visParams, 'BT p60 (clipped)');
