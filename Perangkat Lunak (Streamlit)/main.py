@@ -33,7 +33,7 @@ labels = {
         "error_sentinel": "Harap unggah file Sentinel-2 GeoTIFF.",
         "error_dem": "Harap unggah file DEM GeoTIFF.",
         "error_thermal": "Harap unggah file Thermal GeoTIFF.",
-        "result": "Hasil Deteksi: Latitude={lat}, Longitude={lon}",
+        "result": "Koordinat Hasil Deteksi (Latitude, Longitude): ({lat}, {lon})",
         "result_title": "Hasil Deteksi"
     },
     "en": {
@@ -46,8 +46,8 @@ labels = {
             "Low NDVI Cluster",
             "Largest Blob in Low NDVI Cluster",
             "Low NDVI Cluster + DEM (2D clustering)",
-            "Stepwise Clustering (High DEM → Low NDVI)",
-            "Stepwise Clustering (High DEM → Low NDVI → High Thermal)"
+            "Sequential Clustering (High DEM → Low NDVI)",
+            "Sequential Clustering (High DEM → Low NDVI → High Thermal)"
         ],
         "upload_sentinel": "Upload Sentinel-2 GeoTIFF",
         "upload_dem": "Upload DEM GeoTIFF",
@@ -56,7 +56,7 @@ labels = {
         "error_sentinel": "Please upload Sentinel-2 GeoTIFF file.",
         "error_dem": "Please upload DEM GeoTIFF file.",
         "error_thermal": "Please upload Thermal GeoTIFF file.",
-        "result": "Detection Result: Latitude={lat}, Longitude={lon}",
+        "result": "Detection Result Coordinates (Latitude, Longitude): ({lat}, {lon})",
         "result_title": "Detection Result"
     }
 }
@@ -135,14 +135,14 @@ info_text = {
     Process: K-Means (k=2) using NDVI + DEM features → select low NDVI cluster  
     Output: Center of mass of the masked low NDVI area  
 
-    4. **Stepwise Clustering (High DEM → Low NDVI)**  
+    4. **Sequential Clustering (High DEM → Low NDVI)**  
     Input: NDVI + DEM  
     Process:  
     Step 1 (DEM): K-Means (k=2) on DEM → select high DEM cluster  
     Step 2 (NDVI): K-Means (k=2) on NDVI within the high DEM area → select low NDVI cluster  
     Output: Center of mass of the step 2 result  
 
-    5. **Stepwise Clustering (High DEM → Low NDVI → High Thermal)**  
+    5. **Sequential Clustering (High DEM → Low NDVI → High Thermal)**  
     Input: NDVI + DEM + Thermal  
     Process:  
     Step 1 (DEM): K-Means (k=2) on DEM → select high DEM cluster  
