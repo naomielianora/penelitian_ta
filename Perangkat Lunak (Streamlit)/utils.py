@@ -49,7 +49,7 @@ def metode_1_center_of_mass(image_path):
     lon, lat = rasterio.transform.xy(transform, cy, cx)
     true_color = create_true_color_image(image_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 def metode_2_largest_blob(image_path):
     with rasterio.open(image_path) as src:
@@ -80,7 +80,7 @@ def metode_2_largest_blob(image_path):
 
     lon, lat = rasterio.transform.xy(transform, cy, cx)
 
-    return lat, lon, ndvi, create_true_color_image(image_path), (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 def metode_3_closest_blob(image_path):
     with rasterio.open(image_path) as src:
@@ -113,7 +113,7 @@ def metode_3_closest_blob(image_path):
 
     lon, lat = rasterio.transform.xy(transform, cy, cx)
 
-    return lat, lon, create_true_color_image(image_path), (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 
 
@@ -174,7 +174,7 @@ def metode_4_ndvi_dem(sentinel_path, dem_path):
     # Visualisasi True Color
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 
 
@@ -261,7 +261,7 @@ def metode_5_ndvi_dem(sentinel_path, dem_path):
 
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 
 def metode_6_ndvi_dem_thermal(sentinel_path, dem_path, thermal_path):
@@ -383,7 +383,7 @@ def metode_6_ndvi_dem_thermal(sentinel_path, dem_path, thermal_path):
 
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 def metode_7_ndvi_dem_thermal(sentinel_path, dem_path, thermal_path):
     """
@@ -508,7 +508,7 @@ def metode_7_ndvi_dem_thermal(sentinel_path, dem_path, thermal_path):
 
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 
 def metode_8_dem_ndvi(sentinel_path, dem_path):
@@ -601,7 +601,7 @@ def metode_8_dem_ndvi(sentinel_path, dem_path):
     # True color
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 def metode_9_dem_ndvi_thermal(sentinel_path, dem_path, thermal_path):
     """
@@ -720,7 +720,7 @@ def metode_9_dem_ndvi_thermal(sentinel_path, dem_path, thermal_path):
     # True color
     true_color = create_true_color_image(sentinel_path)
 
-    return lat, lon, true_color, (cx, cy)
+    return lat, lon, (cx, cy), true_color
 
 
 

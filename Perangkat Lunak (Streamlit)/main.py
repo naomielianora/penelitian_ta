@@ -253,14 +253,15 @@ elif st.session_state.page == "main":
             elif metode == labels[st.session_state.lang]["methods"][4]:
                 lat, lon, (cx, cy), true_color = metode_9_dem_ndvi_thermal(tmp_sentinel_path, tmp_dem_path, tmp_thermal_path)
 
-            # Tampilkan hasil
+           # Tampilkan hasil
             st.success(labels[st.session_state.lang]["result"].format(lat=lat, lon=lon))
 
             fig, ax = plt.subplots()
             ax.imshow(true_color)
             ax.scatter(cx, cy, c="red", s=50, marker="x")
-            ax.set_title(labels[st.session_state.lang]["result_title"])
+            ax.axis("off") 
             st.pyplot(fig)
+
 
             # Hapus file sementara
             os.remove(tmp_sentinel_path)

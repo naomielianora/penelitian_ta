@@ -1,49 +1,55 @@
-// // Daftar gunung yang pakai DEM SRTM dengan buffer
-// var volcanoesWithBuffer = [
-//   { name: "Anak_Krakatau", area: Anak_Krakatau, buffer: 1000 },
-//   { name: "Wurlali", area: Wurlali, buffer: 4000 },
-//   { name: "Banda_Api", area: Banda_Api, buffer: 3000 },
-//   { name: "Colo", area: Colo, buffer: 5000 }
-// ];
-
-// // Proses tiap gunung
-// volcanoesWithBuffer.forEach(function(volcano) {
-//   // Ambil GeometryCollection
-//   var geomCollection = ee.Geometry(volcano.area);
-
-//   // Ambil semua geometri (Point dan Polygon)
-//   var geometries = ee.List(geomCollection.geometries());
-
-//   // Ambil Point untuk buffer
-//   var point = ee.Geometry(geometries.get(0));
-
-//   // Ambil Polygon untuk kliping akhir
-//   var polygon = ee.Geometry(geometries.get(1));
-
-//   // Buat buffer dari Point
-//   var bufferedArea = point.buffer(volcano.buffer);
-
-//   // Ambil DEM SRTM dan potong dengan buffer (supaya data cukup luas)
-//   var demBuffered = ee.Image("USGS/SRTMGL1_003").clip(bufferedArea);
-
-//   // Lalu potong lagi dengan kotak Polygon sesuai area Sentinel
-//   var demFinal = demBuffered.clip(polygon);
-
-//   // Ekspor hasil akhir ke Drive
-//   Export.image.toDrive({
-//     image: demFinal,
-//     description: "DEM_SRTM_" + volcano.name,
-//     folder: "DEM_Exports",
-//     region: polygon, // clip terakhir
-//     scale: 30,
-//     maxPixels: 1e13,
-//     fileFormat: "GeoTIFF",
-//     crs: "EPSG:4326"
-//   });
-// });
+//TERDAPAT 2 MACAM KODE
+//1. Menggunakan DEM dari GEE dengan buffer (untuk gunung di Indonesia yang terpencil/gunung luar Indonesia)
+//2. Menggunakan DEM dari Indonesia Geospasial yang menyediakan DEM per provinsi di Indonesia
 
 
+// KODE 1
+// Daftar gunung yang pakai DEM dari GEE dengan buffer
+var volcanoesWithBuffer = [
+  { name: "Anak_Krakatau", area: Anak_Krakatau, buffer: 1000 },
+  { name: "Wurlali", area: Wurlali, buffer: 4000 },
+  { name: "Banda_Api", area: Banda_Api, buffer: 3000 },
+  { name: "Colo", area: Colo, buffer: 5000 }
+];
 
+// Proses tiap gunung
+volcanoesWithBuffer.forEach(function(volcano) {
+  // Ambil GeometryCollection
+  var geomCollection = ee.Geometry(volcano.area);
+
+  // Ambil semua geometri (Point dan Polygon)
+  var geometries = ee.List(geomCollection.geometries());
+
+  // Ambil Point untuk buffer
+  var point = ee.Geometry(geometries.get(0));
+
+  // Ambil Polygon untuk kliping akhir
+  var polygon = ee.Geometry(geometries.get(1));
+
+  // Buat buffer dari Point
+  var bufferedArea = point.buffer(volcano.buffer);
+
+  // Ambil DEM SRTM dan potong dengan buffer (supaya data cukup luas)
+  var demBuffered = ee.Image("USGS/SRTMGL1_003").clip(bufferedArea);
+
+  // Lalu potong lagi dengan kotak Polygon sesuai area Sentinel
+  var demFinal = demBuffered.clip(polygon);
+
+  // Ekspor hasil akhir ke Drive
+  Export.image.toDrive({
+    image: demFinal,
+    description: "DEM_SRTM_" + volcano.name,
+    folder: "DEM_Exports",
+    region: polygon, // clip terakhir
+    scale: 30,
+    maxPixels: 1e13,
+    fileFormat: "GeoTIFF",
+    crs: "EPSG:4326"
+  });
+});
+
+
+// KODE 2
 // Mapping gunung ke DEM provinsi yang sesuai
 var volcanoDEMList = [
   // Aceh
